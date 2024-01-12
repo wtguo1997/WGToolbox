@@ -10,7 +10,7 @@ Batchname=$3
 TIME=$4
 
 if [ ! $Jobname ]; then
-        echo "Usage: rung16 input.com(input.gjf) [shared(compute)]"
+        echo "Usage: run input.com(input.gjf) MemOption Batchname"
         exit
 else
         echo Submitted Jobname = $1
