@@ -21,7 +21,7 @@ fi
 
 
 Procs=`head -8 $1 | grep -iE 'nprocshared|nprocs' | sed -s 's/%[nN][pP]roc[sS]hared=//g' | sed -s 's/%[nN][pP]roc[sS]=//g' | sed 's/\r//g'`
-Mems=`head -8 $1 | grep -iE 'mem=|memory=' | sed -n 's/.*%\(mem=\|memory=\)\([0-9]*\).*/\2/p'`
+Mems=`head -8 $1 | grep -iE 'mem=|Mem=' | sed -n 's/.*%\(mem=\|Mem=\)\([0-9]*\).*/\2/p'`
 
 
 if [ ! $Procs ] || [ -z "$Mems" ]; then
@@ -55,7 +55,7 @@ else
 fi
 
 if [ ! $TIME ]; then
-	TIME=24
+	TIME=48
 fi
 
 echo "The time limit is: $TIME hours"
