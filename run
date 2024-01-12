@@ -1,0 +1,91 @@
+# Author: Wentao Guo 2024 Jan
+# based on Fred's scratch script in 2020
+
+#!/bin/bash
+# Make sure that the unit for memory required in your Gaussian job is in GB
+
+Jobname=$1
+MemOption=$2
+Batchname=$3
+TIME=$4
+
+if [ ! $Jobname ]; then
+        echo "Usage: rung16 input.com(input.gjf) [shared(compute)]"
+        exit
+else
+        echo Submitted Jobname = $1
+fi
+if [ ! $Batchname ]; then
+        Batchname=shared
+fi
+
+
+Procs=`head -8 $1 | grep -iE 'nprocshared|nprocs' | sed -s 's/%[nN][pP]roc[sS]hared=//g' | sed -s 's/%[nN][pP]roc[sS]=//g' | sed 's/\r//g'`
+Mems=`head -8 $1 | grep -iE 'mem=|memory=' | sed -n 's/.*%\(mem=\|memory=\)\([0-9]*\).*/\2/p'`
+
+
+if [ ! $Procs ] || [ -z "$Mems" ]; then
+        echo " "
+        echo "Wrong Input file format. "
+        echo "You must use %NProcShared=Procs and %mem=Mem "
+        echo "in your Gaussian input file to submit Gaussian jobs!!!"
+        echo " "
+        exit
+else
+        if [ $Procs -le '32' ]; then
+                echo "The job will use $Procs threads."
+        else
+                echo " "
+                echo "Wrong Processor Number Requested!"
+                exit
+        fi
+fi
+
+echo "Procs required in Gaussian input file: $Procs"
+echo "Memory required in Gaussian input file: $Mems"
+
+if [ ! $MemOption ] || [ "$MemOption" -eq "def" ]; then
+        echo "Memory required in job submission file: $Mems"
+	Mems="${Mems}G"
+else
+        MemsPlusOne=$((Mems + 1))
+        #echo $MemsPlusOne
+        Mems="${MemsPlusOne}G"
+        echo "Memory required in job submission file: $Mems"
+fi
+
+if [ ! $TIME ]; then
+	TIME=24
+fi
+
+echo "The time limit is: $TIME hours"
+echo "The partition is: $Batchname"
+
+FORMATTED_TIME="${TIME}:00:00"
+JobSub=`echo $Jobname | sed 's/.com/.job/g' | sed 's/.gjf/.job/g'`
+echo " "
+#echo $Jobname
+#echo $Batchname
+#echo $JobSub
+
+cat<<EOF>$JobSub
+#!/bin/bash
+#SBATCH --partition=$Batchname
+#SBATCH --nodes=1  
+#SBATCH --ntasks-per-node=$Procs
+#SBATCH --export=ALL  
+#SBATCH -t $FORMATTED_TIME
+#SBATCH --mem=$Mems
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=wtguo@ucdavis.edu
+#SBATCH --account=ucd114
+
+. /etc/profile.d/modules.sh
+module load gaussian/16.C.01
+export GAUSS_SCRDIR=/scratch/\$USER/job_\$SLURM_JOB_ID
+g16 $Jobname
+
+EOF
+
+sbatch $JobSub
+#rm $JobSub
