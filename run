@@ -10,7 +10,7 @@ Batchname=$3
 TIME=$4
 
 if [ ! $Jobname ]; then
-        echo "Usage: run input.com(input.gjf) MemOption Batchname"
+        echo "Usage: run input.com(input.gjf) MemOption Batchname Timelimit"
         exit
 else
         echo Submitted Jobname = $1
@@ -44,7 +44,7 @@ fi
 echo "Procs required in Gaussian input file: $Procs"
 echo "Memory required in Gaussian input file: $Mems"
 
-if [ ! $MemOption ] || [ "$MemOption" -eq "def" ]; then
+if [ ! $MemOption ] || [ "$MemOption" != "def" ]; then
         echo "Memory required in job submission file: $Mems"
 	Mems="${Mems}G"
 else
@@ -77,7 +77,7 @@ cat<<EOF>$JobSub
 #SBATCH -t $FORMATTED_TIME
 #SBATCH --mem=$Mems
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=wtguo@ucdavis.edu
+#SBATCH --mail-user=123@gmail.com
 #SBATCH --account=ucd114
 
 . /etc/profile.d/modules.sh
