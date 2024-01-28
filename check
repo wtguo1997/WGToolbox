@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Check if two arguments are provided
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <search_string> <file_extension>"
+    exit 1
+fi
+
+check="$1"
+extension="$2"
+
+# Initialize a variable to track the result
+all_files_contain_search_string=true
+
+# Check if there are any files with the specified extension
+if ! ls *."$extension" 1> /dev/null 2>&1; then
+    echo "Error: No files with .$extension extension found."
+    exit 1
+fi
+
+# Loop through all files with the specified extension
+for file in *."$extension"; do
+    if [ -f "$file" ]; then
+        if ! grep -q "$check" "$file"; then
+            echo "File $file does not contain '$check'"
+            all_files_contain_search_string=false
+        fi
+    fi
+done
+
+# Check the result
+if [ "$all_files_contain_search_string" = true ]; then
+    echo "All .$extension files contain '$check'"
+else
+    echo "Not all .$extension files contain '$check'"
+fi

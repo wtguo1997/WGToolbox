@@ -1,6 +1,3 @@
-# Author: Wentao Guo 2024 Jan
-# based on Fred's scratch script in 2020
-
 #!/bin/bash
 # Make sure that the unit for memory required in your Gaussian job is in GB
 
@@ -10,7 +7,7 @@ Batchname=$3
 TIME=$4
 
 if [ ! $Jobname ]; then
-        echo "Usage: run input.com(input.gjf) MemOption Batchname Timelimit"
+        echo "Usage: run input.com(input.gjf) MemOption Batchname"
         exit
 else
         echo Submitted Jobname = $1
@@ -44,7 +41,7 @@ fi
 echo "Procs required in Gaussian input file: $Procs"
 echo "Memory required in Gaussian input file: $Mems"
 
-if [ ! $MemOption ] || [ "$MemOption" != "def" ]; then
+if [ ! $MemOption ] || [ "$MemOption" == "def" ]; then
         echo "Memory required in job submission file: $Mems"
 	Mems="${Mems}G"
 else
@@ -77,8 +74,9 @@ cat<<EOF>$JobSub
 #SBATCH -t $FORMATTED_TIME
 #SBATCH --mem=$Mems
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=123@gmail.com
+#SBATCH --mail-user=XXXX@gmail.com
 #SBATCH --account=ucd114
+ulimit -c 0
 
 . /etc/profile.d/modules.sh
 module load gaussian/16.C.01
